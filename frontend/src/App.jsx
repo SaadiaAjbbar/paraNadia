@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
+import Categories from './pages/Categories';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -31,6 +32,7 @@ export default function App() {
         <Route path="/" element={<Layout onLogout={handleLogout} />}>
           <Route index element={<Dashboard />} />
           <Route path="products" element={<Products />} />
+          <Route path="categories" element={<Categories />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
