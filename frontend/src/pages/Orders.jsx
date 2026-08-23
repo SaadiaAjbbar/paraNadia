@@ -25,7 +25,7 @@ export default function Orders() {
 
     const handleStatusChange = async (orderId, newStatus) => {
         try {
-            await api.patch(`/orders/${orderId}`, { status: newStatus });
+            await api.put(`/orders/${orderId}`, { status: newStatus });
             fetchOrders();
             if (selectedOrder?.id === orderId) {
                 setSelectedOrder({ ...selectedOrder, status: newStatus });
