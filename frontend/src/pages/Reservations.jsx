@@ -24,7 +24,7 @@ export default function Reservations() {
 
     const handleStatusChange = async (id, status) => {
         try {
-            await api.put(`/reservations/${id}`, { status });
+            await api.patch(`/reservations/${id}/status`, { status });
             fetchReservations();
         } catch (err) {
             alert('Impossible de mettre à jour le statut');

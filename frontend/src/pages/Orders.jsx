@@ -25,7 +25,7 @@ export default function Orders() {
 
     const handleStatusChange = async (orderId, newStatus) => {
         try {
-            await api.put(`/orders/${orderId}`, { status: newStatus });
+            await api.patch(`/orders/${orderId}/status`, { status: newStatus });
             fetchOrders();
             if (selectedOrder?.id === orderId) {
                 setSelectedOrder({ ...selectedOrder, status: newStatus });
@@ -34,7 +34,6 @@ export default function Orders() {
             alert('Impossible de mettre à jour le statut');
         }
     };
-
     const getStatusBadge = (status) => {
         switch (status) {
             case 'completed':
