@@ -9,7 +9,6 @@ export default function Products() {
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
 
-    // Modal state for adding product
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -56,7 +55,7 @@ export default function Products() {
         e.preventDefault();
         const data = new FormData();
         Object.keys(formData).forEach((key) => {
-            if (formData[key] !== null) {
+            if (formData[key] !== null && formData[key] !== '') {
                 data.append(key, formData[key]);
             }
         });
@@ -75,7 +74,6 @@ export default function Products() {
 
     return (
         <div className="space-y-6">
-            {/* Header & Actions */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-800">Gestion des Produits</h1>
@@ -89,7 +87,6 @@ export default function Products() {
                 </button>
             </div>
 
-            {/* Filters */}
             <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
                     <Search className="w-5 h-5 absolute left-3 top-3 text-gray-400" />
@@ -113,7 +110,6 @@ export default function Products() {
                 </select>
             </div>
 
-            {/* Products Table */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 {loading ? (
                     <div className="p-8 text-center text-gray-500">Chargement...</div>
@@ -130,7 +126,7 @@ export default function Products() {
                         </thead>
                         <tbody className="divide-y divide-gray-100 text-sm">
                             {products.map((item) => {
-                                const isLowStock = item.stock <= item.min_stock;
+                                const isLowStock = Number(item.stock) <= Number(item.min_stock);
                                 return (
                                     <tr key={item.id} className="hover:bg-gray-50/50 transition">
                                         <td className="p-4 flex items-center gap-3">
@@ -150,7 +146,7 @@ export default function Products() {
                                         <td className="p-4 font-semibold text-emerald-600">{item.price} DH</td>
                                         <td className="p-4">
                                             <span className={`font-medium ${isLowStock ? 'text-red-600' : 'text-gray-700'}`}>
-                                                {item.stock} units
+                                                {item.stock} unités
                                             </span>
                                         </td>
                                         <td className="p-4">
@@ -172,7 +168,6 @@ export default function Products() {
                 )}
             </div>
 
-            {/* Modal d'ajout */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
                     <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">

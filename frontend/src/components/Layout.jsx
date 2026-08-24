@@ -5,18 +5,22 @@ import {
     ShoppingCart,
     Calendar,
     Layers,
-    LogOut
+    LogOut,
+    DollarSign,
+    Settings as SettingsIcon
 } from 'lucide-react';
 
 export default function Layout({ onLogout }) {
     const location = useLocation();
 
     const navItems = [
+        { name: 'Ventes', path: '/sales', icon: DollarSign },
         { name: 'Tableau de bord', path: '/', icon: LayoutDashboard },
         { name: 'Produits', path: '/products', icon: Package },
         { name: 'Catégories', path: '/categories', icon: Layers },
         { name: 'Commandes', path: '/orders', icon: ShoppingCart },
         { name: 'Réservations', path: '/reservations', icon: Calendar },
+        { name: 'Paramètres', path: '/settings', icon: SettingsIcon },
     ];
 
     return (
@@ -38,8 +42,8 @@ export default function Layout({ onLogout }) {
                                     key={item.path}
                                     to={item.path}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${isActive
-                                            ? 'bg-emerald-700 text-white shadow-md'
-                                            : 'text-emerald-200 hover:bg-emerald-800 hover:text-white'
+                                        ? 'bg-emerald-700 text-white shadow-md'
+                                        : 'text-emerald-200 hover:bg-emerald-800 hover:text-white'
                                         }`}
                                 >
                                     <Icon className="w-5 h-5" />
