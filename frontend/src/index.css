@@ -1,1 +1,28 @@
 @import "tailwindcss";
+@media print {
+  /* إخفاء شريط الجانب Sidebar وأي عنصر لا يتصل بالفاتورة */
+  aside, 
+  nav, 
+  header, 
+  .no-print {
+    display: none !important;
+  }
+
+  /* جعل الفاتورة تأخذ مساحة الصفحة الكاملة وبخلفية بيضاء ونصوص سوداء للطباعة */
+  body, main {
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  /* إلغاء الظلال والحدود الداكنة الخاصة بـ Dark Mode عند الطباعة */
+  .print-area {
+    width: 100% !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: white !important;
+    color: black !important;
+  }
+}
