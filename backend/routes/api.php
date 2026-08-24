@@ -9,6 +9,7 @@ use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\DashboardController;
+use App\Http\Controllers\ParapharmacySettingController;
 
 // Routes العامة
 Route::post('/login', [AuthController::class, 'login']);
@@ -43,5 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('orders', OrderController::class)->except(['update', 'destroy']);
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
 
+    //para infos
+    Route::get('/parapharmacy-settings', [ParapharmacySettingController::class, 'show']);
+    Route::put('/parapharmacy-settings', [ParapharmacySettingController::class, 'update']);
 
 });
