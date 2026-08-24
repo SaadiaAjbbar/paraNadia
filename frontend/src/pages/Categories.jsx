@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { Plus, FolderPlus, Trash2, Tag } from 'lucide-react';
+import { Plus, FolderPlus, Trash2, Tag, Sparkles } from 'lucide-react';
 
 export default function Categories() {
     const [categories, setCategories] = useState([]);
@@ -47,73 +47,75 @@ export default function Categories() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             <div>
-                <h1 className="text-2xl font-bold text-gray-800">Gestion des Catégories</h1>
-                <p className="text-gray-500 text-sm">Organisez vos produits par catégories</p>
+                <h1 className="text-3xl font-extrabold text-white tracking-tight">Gestion des Catégories</h1>
+                <p className="text-slate-400 text-sm mt-1">Organisez vos produits par catégories facilement</p>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Formulaire d'ajout */}
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
-                    <div className="flex items-center gap-2 font-bold text-gray-800 mb-4">
-                        <FolderPlus className="w-5 h-5 text-emerald-600" />
-                        <h2>Nouvelle Catégorie</h2>
+                <div className="bg-slate-900/80 backdrop-blur-xl p-6 rounded-2xl border border-slate-800 shadow-xl shadow-black/20 h-fit">
+                    <div className="flex items-center gap-3 font-bold text-white mb-6 pb-4 border-b border-slate-800">
+                        <div className="p-2 bg-blue-500/10 text-blue-400 rounded-lg">
+                            <FolderPlus className="w-5 h-5" />
+                        </div>
+                        <h2 className="text-lg">Nouvelle Catégorie</h2>
                     </div>
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Nom</label>
                             <input
                                 type="text"
                                 required
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 placeholder="Ex: Soins du Visage"
-                                className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none focus:border-emerald-500"
+                                className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Description</label>
                             <textarea
                                 rows="3"
                                 value={description}
                                 onChange={(e) => setDescription(e.target.value)}
                                 placeholder="Description optionnelle..."
-                                className="w-full px-4 py-2 border border-gray-200 rounded-xl outline-none focus:border-emerald-500"
+                                className="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition resize-none"
                             ></textarea>
                         </div>
                         <button
                             type="submit"
-                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 rounded-xl transition flex items-center justify-center gap-2"
+                            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 active:scale-[0.98]"
                         >
-                            <Plus className="w-4 h-4" /> Ajouter
+                            <Plus className="w-5 h-5" /> Ajouter
                         </button>
                     </form>
                 </div>
 
                 {/* Liste des catégories */}
-                <div className="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-                    <h2 className="font-bold text-gray-800 mb-4">Catégories existantes</h2>
+                <div className="lg:col-span-2 bg-slate-900/80 backdrop-blur-xl p-6 rounded-2xl border border-slate-800 shadow-xl shadow-black/20">
+                    <h2 className="font-bold text-white text-lg mb-6 pb-4 border-b border-slate-800">Catégories existantes</h2>
                     {loading ? (
-                        <p className="text-gray-400">Chargement...</p>
+                        <div className="p-8 text-center text-slate-500 animate-pulse">Chargement...</div>
                     ) : categories.length === 0 ? (
-                        <p className="text-gray-400">Aucune catégorie trouvée.</p>
+                        <div className="p-8 text-center text-slate-500">Aucune catégorie trouvée.</div>
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             {categories.map((cat) => (
-                                <div key={cat.id} className="p-4 border border-gray-100 bg-gray-50/50 rounded-xl flex items-start justify-between">
-                                    <div className="flex items-start gap-3">
-                                        <div className="p-2 bg-emerald-100 text-emerald-700 rounded-lg mt-0.5">
+                                <div key={cat.id} className="p-5 border border-slate-800 bg-slate-950/60 rounded-xl flex items-start justify-between hover:border-slate-700 transition group">
+                                    <div className="flex items-start gap-3.5">
+                                        <div className="p-2.5 bg-blue-500/10 text-blue-400 rounded-xl group-hover:scale-105 transition-transform">
                                             <Tag className="w-4 h-4" />
                                         </div>
                                         <div>
-                                            <h3 className="font-semibold text-gray-800">{cat.name}</h3>
-                                            <p className="text-xs text-gray-500 mt-0.5">{cat.description || 'Pas de description'}</p>
+                                            <h3 className="font-semibold text-slate-100">{cat.name}</h3>
+                                            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{cat.description || 'Pas de description'}</p>
                                         </div>
                                     </div>
                                     <button
                                         onClick={() => handleDelete(cat.id)}
-                                        className="text-gray-400 hover:text-red-600 transition p-1"
+                                        className="text-slate-500 hover:text-rose-400 transition p-1.5 hover:bg-rose-500/10 rounded-lg"
                                     >
                                         <Trash2 className="w-4 h-4" />
                                     </button>

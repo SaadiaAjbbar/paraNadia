@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { Store, Phone, MapPin, Mail, Save, CheckCircle } from 'lucide-react';
+import { Store, Phone, MapPin, Mail, Save, CheckCircle, FileText } from 'lucide-react';
 
 export default function Settings() {
     const [loading, setLoading] = useState(true);
@@ -53,64 +53,67 @@ export default function Settings() {
     };
 
     if (loading) {
-        return <div className="p-8 text-center text-gray-500">Chargement des paramètres...</div>;
+        return <div className="p-12 text-center text-slate-500 animate-pulse">Chargement des paramètres...</div>;
     }
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-2xl mx-auto space-y-8">
+            {/* Header */}
             <div>
-                <h1 className="text-2xl font-bold text-gray-800">Paramètres de la Parapharmacie</h1>
-                <p className="text-gray-500 text-sm">Gérez les informations qui apparaîtront sur vos factures et reçus</p>
+                <h1 className="text-3xl font-extrabold text-white tracking-tight">Paramètres de la Parapharmacie</h1>
+                <p className="text-slate-400 text-sm mt-1">Gérez les informations qui apparaîtront sur vos factures et reçus</p>
             </div>
 
+            {/* Success Alert */}
             {successMessage && (
-                <div className="p-4 bg-emerald-50 text-emerald-700 rounded-xl border border-emerald-200 flex items-center gap-2 text-sm font-medium">
-                    <CheckCircle className="w-5 h-5 text-emerald-600" />
+                <div className="p-4 bg-emerald-950/40 text-emerald-400 rounded-2xl border border-emerald-500/30 flex items-center gap-3 text-sm font-semibold shadow-lg shadow-emerald-950/20">
+                    <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
                     {successMessage}
                 </div>
             )}
 
-            <form onSubmit={handleSubmit} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="bg-slate-900/80 backdrop-blur-xl p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-xl shadow-black/20 space-y-5">
                 <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Nom de la Parapharmacie</label>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Nom de la Parapharmacie</label>
                     <div className="relative">
-                        <Store className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                        <Store className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-500" />
                         <input
                             type="text"
                             required
                             value={form.name}
                             onChange={(e) => setForm({ ...form, name: e.target.value })}
-                            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-emerald-500"
-                            placeholder="Ex: Parapharmacie Sante & Beaute"
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
+                            placeholder="Ex: Parapharmacie Santé & Beauté"
                         />
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">Numéro de Téléphone</label>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Numéro de Téléphone</label>
                         <div className="relative">
-                            <Phone className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                            <Phone className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-500" />
                             <input
                                 type="text"
                                 required
                                 value={form.phone}
                                 onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
                                 placeholder="Ex: 0522 00 00 00"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">Email (Optionnel)</label>
+                        <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Email (Optionnel)</label>
                         <div className="relative">
-                            <Mail className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                            <Mail className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-500" />
                             <input
                                 type="email"
                                 value={form.email}
                                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                                className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
                                 placeholder="contact@para.ma"
                             />
                         </div>
@@ -118,36 +121,39 @@ export default function Settings() {
                 </div>
 
                 <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Adresse Complète</label>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Adresse Complète</label>
                     <div className="relative">
-                        <MapPin className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
+                        <MapPin className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-500" />
                         <textarea
                             rows="2"
                             required
                             value={form.address}
                             onChange={(e) => setForm({ ...form, address: e.target.value })}
-                            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-emerald-500"
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
                             placeholder="Adresse de la parapharmacie..."
                         ></textarea>
                     </div>
                 </div>
 
                 <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">ICE (Optionnel)</label>
-                    <input
-                        type="text"
-                        value={form.ice}
-                        onChange={(e) => setForm({ ...form, ice: e.target.value })}
-                        className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-emerald-500"
-                        placeholder="Ex: 001234567000089"
-                    />
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">ICE (Optionnel)</label>
+                    <div className="relative">
+                        <FileText className="w-4 h-4 absolute left-3.5 top-3.5 text-slate-500" />
+                        <input
+                            type="text"
+                            value={form.ice}
+                            onChange={(e) => setForm({ ...form, ice: e.target.value })}
+                            className="w-full pl-10 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
+                            placeholder="Ex: 001234567000089"
+                        />
+                    </div>
                 </div>
 
-                <div className="pt-2">
+                <div className="pt-3">
                     <button
                         type="submit"
                         disabled={saving}
-                        className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium p-2.5 rounded-xl transition flex items-center justify-center gap-2 text-sm shadow-md"
+                        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold py-3 rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 text-sm active:scale-[0.98] disabled:opacity-50"
                     >
                         <Save className="w-4 h-4" />
                         {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}

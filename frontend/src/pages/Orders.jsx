@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { ShoppingBag, Eye, Trash2, Plus, X } from 'lucide-react';
+import { ShoppingBag, Eye, Trash2, Plus, X, Phone, MapPin, User, Calendar, CreditCard } from 'lucide-react';
 
 export default function Orders() {
     const [orders, setOrders] = useState([]);
@@ -61,7 +61,6 @@ export default function Orders() {
             await api.patch(`/orders/${orderId}/status`, { status: newStatus });
             fetchData();
         } catch (err) {
-            // Dans le cas où l'API utilise PUT au lieu de PATCH
             try {
                 await api.put(`/orders/${orderId}`, { status: newStatus });
                 fetchData();
@@ -145,98 +144,123 @@ export default function Orders() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
+        <div className="space-y-8">
+            {/* Top Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Gestion des Commandes</h1>
-                    <p className="text-gray-500 text-sm">Suivi, création et modification des commandes clients</p>
+                    <h1 className="text-3xl font-extrabold text-white tracking-tight">Gestion des Commandes</h1>
+                    <p className="text-slate-400 text-sm mt-1">Suivi, création et modification des commandes clients</p>
                 </div>
                 <button
                     onClick={() => setShowCreateModal(true)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2.5 rounded-xl transition flex items-center gap-2"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold px-5 py-3 rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 active:scale-[0.98]"
                 >
-                    <Plus className="w-4 h-4" /> Nouvelle Commande
+                    <Plus className="w-5 h-5" /> Nouvelle Commande
                 </button>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* Main Table Container */}
+            <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-800 shadow-xl shadow-black/20 overflow-hidden">
                 {loading ? (
-                    <div className="p-8 text-center text-gray-500">Chargement des commandes...</div>
+                    <div className="p-12 text-center text-slate-500 animate-pulse">Chargement des commandes...</div>
                 ) : orders.length === 0 ? (
-                    <div className="p-8 text-center text-gray-400">Aucune commande trouvée</div>
+                    <div className="p-12 text-center text-slate-500">Aucune commande trouvée</div>
                 ) : (
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 text-xs uppercase tracking-wider">
-                                <th className="p-4">Réf / Client</th>
-                                <th className="p-4">Téléphone / Adresse</th>
-                                <th className="p-4">Date</th>
-                                <th className="p-4">Total</th>
-                                <th className="p-4">Statut</th>
-                                <th className="p-4">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 text-sm">
-                            {orders.map((order) => (
-                                <tr key={order.id} className="hover:bg-gray-50/50 transition">
-                                    <td className="p-4">
-                                        <p className="font-semibold text-gray-800">#{order.id}</p>
-                                        <p className="text-xs text-gray-500">{order.customer_name || order.client_name || order.user?.name || 'Client Passager'}</p>
-                                    </td>
-                                    <td className="p-4 text-xs text-gray-500">
-                                        <p>{order.customer_phone || '-'}</p>
-                                        <p className="truncate max-w-[150px]">{order.shipping_address || '-'}</p>
-                                    </td>
-                                    <td className="p-4 text-gray-600">
-                                        {order.created_at ? new Date(order.created_at).toLocaleDateString('fr-FR') : 'Récemment'}
-                                    </td>
-                                    <td className="p-4 font-bold text-emerald-600">
-                                        {getOrderTotal(order).toFixed(2)} DH
-                                    </td>
-                                    <td className="p-4">
-                                        <select
-                                            value={order.status || 'pending'}
-                                            onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                                            className="text-xs border border-gray-200 rounded-lg p-1.5 bg-white outline-none focus:border-emerald-500 font-medium"
-                                        >
-                                            <option value="pending">En attente</option>
-                                            <option value="completed">Livrée / Payée</option>
-                                            <option value="cancelled">Annulée</option>
-                                        </select>
-                                    </td>
-                                    <td className="p-4 flex items-center gap-2">
-                                        <button
-                                            onClick={() => setSelectedOrder(order)}
-                                            className="p-2 text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
-                                            title="Détails"
-                                        >
-                                            <Eye className="w-4 h-4" />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteOrder(order.id)}
-                                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                                            title="Supprimer"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </td>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-slate-800 bg-slate-950/40 text-slate-400 text-xs uppercase tracking-wider">
+                                    <th className="p-4">Réf / Client</th>
+                                    <th className="p-4">Téléphone / Adresse</th>
+                                    <th className="p-4">Date</th>
+                                    <th className="p-4">Total</th>
+                                    <th className="p-4">Statut</th>
+                                    <th className="p-4 text-right">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800/60 text-sm">
+                                {orders.map((order) => (
+                                    <tr key={order.id} className="hover:bg-slate-800/30 transition">
+                                        <td className="p-4">
+                                            <p className="font-bold text-blue-400">#{order.id}</p>
+                                            <p className="text-slate-200 font-medium">{order.customer_name || order.client_name || order.user?.name || 'Client Passager'}</p>
+                                        </td>
+                                        <td className="p-4 text-xs text-slate-400 space-y-1">
+                                            <div className="flex items-center gap-1.5">
+                                                <Phone className="w-3.5 h-3.5 text-slate-500" />
+                                                <span>{order.customer_phone || '-'}</span>
+                                            </div>
+                                            <div className="flex items-center gap-1.5 max-w-[180px] truncate">
+                                                <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                                                <span className="truncate">{order.shipping_address || '-'}</span>
+                                            </div>
+                                        </td>
+                                        <td className="p-4 text-slate-300">
+                                            <div className="flex items-center gap-1.5 text-xs">
+                                                <Calendar className="w-3.5 h-3.5 text-slate-500" />
+                                                {order.created_at ? new Date(order.created_at).toLocaleDateString('fr-FR') : 'Récemment'}
+                                            </div>
+                                        </td>
+                                        <td className="p-4 font-bold text-slate-100">
+                                            {getOrderTotal(order).toFixed(2)} <span className="text-blue-400 text-xs font-normal">DH</span>
+                                        </td>
+                                        <td className="p-4">
+                                            <select
+                                                value={order.status || 'pending'}
+                                                onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                                className={`text-xs border rounded-xl px-3 py-1.5 bg-slate-950 outline-none font-semibold transition cursor-pointer ${order.status === 'completed'
+                                                        ? 'border-emerald-500/30 text-emerald-400 bg-emerald-950/20'
+                                                        : order.status === 'cancelled'
+                                                            ? 'border-rose-500/30 text-rose-400 bg-rose-950/20'
+                                                            : 'border-amber-500/30 text-amber-400 bg-amber-950/20'
+                                                    }`}
+                                            >
+                                                <option value="pending" className="bg-slate-900 text-amber-400">En attente</option>
+                                                <option value="completed" className="bg-slate-900 text-emerald-400">Livrée / Payée</option>
+                                                <option value="cancelled" className="bg-slate-900 text-rose-400">Annulée</option>
+                                            </select>
+                                        </td>
+                                        <td className="p-4">
+                                            <div className="flex items-center justify-end gap-2">
+                                                <button
+                                                    onClick={() => setSelectedOrder(order)}
+                                                    className="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition"
+                                                    title="Détails"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDeleteOrder(order.id)}
+                                                    className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition"
+                                                    title="Supprimer"
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
 
             {/* Modal de Création */}
             {showCreateModal && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                                <ShoppingBag className="w-5 h-5 text-emerald-600" />
+                <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center pb-4 border-b border-slate-800">
+                            <h2 className="text-lg font-bold text-white flex items-center gap-2.5">
+                                <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
+                                    <ShoppingBag className="w-5 h-5" />
+                                </div>
                                 Nouvelle Commande
                             </h2>
-                            <button onClick={() => setShowCreateModal(false)} className="text-gray-400 hover:text-gray-600">
+                            <button
+                                onClick={() => setShowCreateModal(false)}
+                                className="text-slate-400 hover:text-white p-1 hover:bg-slate-800 rounded-lg transition"
+                            >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
@@ -244,46 +268,49 @@ export default function Orders() {
                         <form onSubmit={handleCreateOrder} className="space-y-4">
                             <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Nom du Client</label>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Client</label>
                                     <input
                                         type="text"
                                         required
                                         value={form.customer_name}
                                         onChange={(e) => setForm({ ...form, customer_name: e.target.value })}
-                                        className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                        placeholder="Nom complet"
+                                        className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Téléphone</label>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Téléphone</label>
                                     <input
                                         type="text"
                                         required
                                         value={form.customer_phone}
                                         onChange={(e) => setForm({ ...form, customer_phone: e.target.value })}
-                                        className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                        placeholder="06XXXXXXXX"
+                                        className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
                                     />
                                 </div>
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Adresse de Livraison</label>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Adresse de Livraison</label>
                                 <input
                                     type="text"
                                     required
                                     value={form.shipping_address}
                                     onChange={(e) => setForm({ ...form, shipping_address: e.target.value })}
-                                    className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                    placeholder="Adresse complète"
+                                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
                                 />
                             </div>
 
                             {/* Section Ajouter Produit */}
-                            <div className="border-t border-b border-gray-100 py-3 space-y-2">
-                                <label className="block text-xs font-semibold text-gray-700">Sélectionner les produits</label>
+                            <div className="border-t border-b border-slate-800 py-4 space-y-3">
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300">Sélectionner les produits</label>
                                 <div className="flex gap-2">
                                     <select
                                         value={currentItem.product_id}
                                         onChange={(e) => setCurrentItem({ ...currentItem, product_id: e.target.value })}
-                                        className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                        className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition"
                                     >
                                         <option value="">Sélectionner un produit</option>
                                         {products.map((p) => (
@@ -297,12 +324,12 @@ export default function Orders() {
                                         min="1"
                                         value={currentItem.quantity}
                                         onChange={(e) => setCurrentItem({ ...currentItem, quantity: e.target.value })}
-                                        className="w-20 border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                        className="w-20 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-slate-100 text-sm text-center focus:outline-none focus:border-blue-500 transition"
                                     />
                                     <button
                                         type="button"
                                         onClick={handleAddItem}
-                                        className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 font-semibold px-3 py-2 rounded-xl text-xs transition"
+                                        className="bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white font-semibold px-4 py-2 rounded-xl text-xs border border-blue-500/30 transition duration-300"
                                     >
                                         Ajouter
                                     </button>
@@ -310,14 +337,18 @@ export default function Orders() {
 
                                 {/* Liste des produits ajoutés */}
                                 {form.items.length > 0 && (
-                                    <div className="space-y-1.5 pt-2">
+                                    <div className="space-y-2 pt-2">
                                         {form.items.map((item, index) => (
-                                            <div key={index} className="flex justify-between items-center text-xs bg-gray-50 p-2 rounded-lg">
-                                                <span>{item.name} (x{item.quantity})</span>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-semibold text-gray-700">{(item.price * item.quantity).toFixed(2)} DH</span>
-                                                    <button type="button" onClick={() => handleRemoveItem(index)} className="text-red-500 hover:text-red-700">
-                                                        <X className="w-3.5 h-3.5" />
+                                            <div key={index} className="flex justify-between items-center text-xs bg-slate-950/60 border border-slate-800/80 p-3 rounded-xl">
+                                                <span className="text-slate-200 font-medium">{item.name} <span className="text-blue-400 font-bold">(x{item.quantity})</span></span>
+                                                <div className="flex items-center gap-3">
+                                                    <span className="font-bold text-slate-100">{(item.price * item.quantity).toFixed(2)} DH</span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => handleRemoveItem(index)}
+                                                        className="text-slate-500 hover:text-rose-400 p-1 hover:bg-rose-500/10 rounded-lg transition"
+                                                    >
+                                                        <X className="w-4 h-4" />
                                                     </button>
                                                 </div>
                                             </div>
@@ -326,14 +357,25 @@ export default function Orders() {
                                 )}
                             </div>
 
-                            <div className="flex justify-between items-center font-bold text-gray-800 text-base">
+                            <div className="flex justify-between items-center font-bold text-slate-100 text-base py-1">
                                 <span>Total:</span>
-                                <span className="text-emerald-600">{newOrderTotal.toFixed(2)} DH</span>
+                                <span className="text-blue-400 text-xl font-extrabold">{newOrderTotal.toFixed(2)} DH</span>
                             </div>
 
-                            <div className="flex gap-2 pt-2">
-                                <button type="button" onClick={() => setShowCreateModal(false)} className="w-full border p-2 rounded-xl text-sm hover:bg-gray-50 transition">Annuler</button>
-                                <button type="submit" className="w-full bg-emerald-600 text-white p-2 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition">Créer la commande</button>
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowCreateModal(false)}
+                                    className="w-full border border-slate-800 text-slate-300 hover:bg-slate-800 py-3 rounded-xl text-sm font-semibold transition"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-3 rounded-xl text-sm font-semibold shadow-lg shadow-blue-600/25 transition"
+                                >
+                                    Créer la commande
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -342,38 +384,61 @@ export default function Orders() {
 
             {/* Modal Détails */}
             {selectedOrder && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-                        <div className="flex justify-between items-center border-b pb-3">
-                            <h2 className="text-lg font-bold text-gray-800">Détails Commande #{selectedOrder.id}</h2>
-                            <button onClick={() => setSelectedOrder(null)} className="text-gray-400 hover:text-gray-600">
+                <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
+                        <div className="flex justify-between items-center border-b border-slate-800 pb-4">
+                            <div>
+                                <h2 className="text-lg font-bold text-white">Détails Commande</h2>
+                                <p className="text-xs text-blue-400 font-semibold mt-0.5">#{selectedOrder.id}</p>
+                            </div>
+                            <button
+                                onClick={() => setSelectedOrder(null)}
+                                className="text-slate-400 hover:text-white p-1 hover:bg-slate-800 rounded-lg transition"
+                            >
                                 <X className="w-5 h-5" />
                             </button>
                         </div>
-                        <div className="space-y-2 text-sm">
-                            <p><span className="text-gray-500">Client:</span> <strong>{selectedOrder.customer_name || selectedOrder.client_name || 'Client Passager'}</strong></p>
-                            <p><span className="text-gray-500">Téléphone:</span> {selectedOrder.customer_phone || '-'}</p>
-                            <p><span className="text-gray-500">Adresse:</span> {selectedOrder.shipping_address || '-'}</p>
-                            <p><span className="text-gray-500">Statut:</span> <span className="capitalize font-semibold">{selectedOrder.status}</span></p>
+
+                        <div className="space-y-3 text-xs bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
+                            <div className="flex items-center gap-2 text-slate-300">
+                                <User className="w-4 h-4 text-blue-400" />
+                                <span className="text-slate-500">Client:</span>
+                                <strong className="text-slate-100 font-semibold">{selectedOrder.customer_name || selectedOrder.client_name || 'Client Passager'}</strong>
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-300">
+                                <Phone className="w-4 h-4 text-blue-400" />
+                                <span className="text-slate-500">Téléphone:</span>
+                                <span className="text-slate-200">{selectedOrder.customer_phone || '-'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-300">
+                                <MapPin className="w-4 h-4 text-blue-400" />
+                                <span className="text-slate-500">Adresse:</span>
+                                <span className="text-slate-200">{selectedOrder.shipping_address || '-'}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-300">
+                                <CreditCard className="w-4 h-4 text-blue-400" />
+                                <span className="text-slate-500">Statut:</span>
+                                <span className="capitalize font-bold text-blue-400">{selectedOrder.status}</span>
+                            </div>
                         </div>
 
                         {selectedOrder.items && selectedOrder.items.length > 0 && (
-                            <div className="border-t pt-3 space-y-2">
-                                <p className="text-xs font-semibold text-gray-500 uppercase">Articles</p>
-                                <div className="divide-y text-xs">
+                            <div className="space-y-2">
+                                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Articles</p>
+                                <div className="divide-y divide-slate-800/60 max-h-48 overflow-y-auto">
                                     {selectedOrder.items.map((item, idx) => (
-                                        <div key={idx} className="py-2 flex justify-between">
-                                            <span>{item.product?.name || item.name || `Produit #${item.product_id}`} (x{item.quantity})</span>
-                                            <span className="font-semibold">{((item.price || item.unit_price || 0) * item.quantity).toFixed(2)} DH</span>
+                                        <div key={idx} className="py-2.5 flex justify-between items-center text-xs">
+                                            <span className="text-slate-300">{item.product?.name || item.name || `Produit #${item.product_id}`} <span className="text-slate-500 font-bold">(x{item.quantity})</span></span>
+                                            <span className="font-semibold text-slate-100">{((item.price || item.unit_price || 0) * item.quantity).toFixed(2)} DH</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         )}
 
-                        <div className="border-t pt-3 flex justify-between items-center font-bold text-gray-800">
-                            <span>Total</span>
-                            <span className="text-emerald-600 text-lg">{getOrderTotal(selectedOrder).toFixed(2)} DH</span>
+                        <div className="border-t border-slate-800 pt-4 flex justify-between items-center">
+                            <span className="font-bold text-slate-300">Total الإجمالي</span>
+                            <span className="text-blue-400 text-xl font-extrabold">{getOrderTotal(selectedOrder).toFixed(2)} DH</span>
                         </div>
                     </div>
                 </div>

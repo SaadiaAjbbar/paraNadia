@@ -1,6 +1,6 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { Plus, CreditCard, DollarSign, Landmark, ShoppingBag, Package, Printer, X } from 'lucide-react';
+import { Plus, ShoppingBag, Printer, X, Receipt } from 'lucide-react';
 
 export default function Sales() {
     const [sales, setSales] = useState([]);
@@ -8,7 +8,7 @@ export default function Sales() {
     const [paraInfo, setParaInfo] = useState({ name: '', phone: '', address: '' });
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
-    const [invoiceSale, setInvoiceSale] = useState(null); // Facture sélectionnée
+    const [invoiceSale, setInvoiceSale] = useState(null);
 
     const [form, setForm] = useState({
         product_id: '',
@@ -107,7 +107,6 @@ export default function Sales() {
             const res = await api.post('/orders', payload);
             const createdOrder = res.data.data || res.data || payload;
 
-            // تحديث الـ Stock
             const newStock = selectedProduct.stock - qty;
             try {
                 await api.post(`/products/${selectedProduct.id}`, {
@@ -133,8 +132,6 @@ export default function Sales() {
             });
 
             await fetchData();
-
-            // إظهار الفاتورة فوراً للطباعة بعد نجاح البيع
             setInvoiceSale(createdOrder);
 
         } catch (err) {
@@ -143,96 +140,111 @@ export default function Sales() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center print:hidden">
+        <div className="space-y-8">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Gestion des Ventes</h1>
-                    <p className="text-gray-500 text-sm">Enregistrement et suivi des ventes directes</p>
+                    <h1 className="text-3xl font-extrabold text-white tracking-tight">Gestion des Ventes</h1>
+                    <p className="text-slate-400 text-sm mt-1">Enregistrement et suivi des ventes directes</p>
                 </div>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2.5 rounded-xl transition flex items-center gap-2"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold px-5 py-3 rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 active:scale-[0.98]"
                 >
-                    <Plus className="w-4 h-4" /> Nouvelle Vente
+                    <Plus className="w-5 h-5" /> Nouvelle Vente
                 </button>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden print:hidden">
+            {/* Table */}
+            <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-800 shadow-xl shadow-black/20 overflow-hidden print:hidden">
                 {loading ? (
-                    <div className="p-8 text-center text-gray-500">Chargement des ventes...</div>
+                    <div className="p-12 text-center text-slate-500 animate-pulse">Chargement des ventes...</div>
                 ) : sales.length === 0 ? (
-                    <div className="p-8 text-center text-gray-400">Aucune vente enregistrée</div>
+                    <div className="p-12 text-center text-slate-500">Aucune vente enregistrée</div>
                 ) : (
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 text-xs uppercase tracking-wider">
-                                <th className="p-4">Réf / Client</th>
-                                <th className="p-4">Mode de paiement</th>
-                                <th className="p-4">Date</th>
-                                <th className="p-4">Total</th>
-                                <th className="p-4 text-center">Facture</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 text-sm">
-                            {sales.map((sale) => (
-                                <tr key={sale.id} className="hover:bg-gray-50/50 transition">
-                                    <td className="p-4">
-                                        <p className="font-semibold text-gray-800">#{sale.id} - {sale.customer_name || 'Client Passager'}</p>
-                                    </td>
-                                    <td className="p-4">
-                                        <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium">
-                                            {sale.payment_type || 'Espèces'}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 text-gray-500">
-                                        {sale.created_at ? new Date(sale.created_at).toLocaleDateString('fr-FR') : 'Aujourd\'hui'}
-                                    </td>
-                                    <td className="p-4 font-bold text-emerald-600">
-                                        {getSaleTotal(sale).toFixed(2)} DH
-                                    </td>
-                                    <td className="p-4 text-center">
-                                        <button
-                                            onClick={() => setInvoiceSale(sale)}
-                                            className="p-2 text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
-                                            title="Imprimer Facture"
-                                        >
-                                            <Printer className="w-4 h-4 mx-auto" />
-                                        </button>
-                                    </td>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-slate-800 bg-slate-950/40 text-slate-400 text-xs uppercase tracking-wider">
+                                    <th className="p-4">Réf / Client</th>
+                                    <th className="p-4">Mode de paiement</th>
+                                    <th className="p-4">Date</th>
+                                    <th className="p-4">Total</th>
+                                    <th className="p-4 text-center">Facture</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800/60 text-sm">
+                                {sales.map((sale) => (
+                                    <tr key={sale.id} className="hover:bg-slate-800/30 transition">
+                                        <td className="p-4">
+                                            <p className="font-semibold text-slate-100">#{sale.id} - {sale.customer_name || 'Client Passager'}</p>
+                                        </td>
+                                        <td className="p-4">
+                                            <span className="inline-flex items-center px-3 py-1 bg-slate-950 border border-slate-800 text-slate-300 rounded-lg text-xs font-medium">
+                                                {sale.payment_type || 'Espèces'}
+                                            </span>
+                                        </td>
+                                        <td className="p-4 text-slate-400 text-xs">
+                                            {sale.created_at ? new Date(sale.created_at).toLocaleDateString('fr-FR') : 'Aujourd\'hui'}
+                                        </td>
+                                        <td className="p-4 font-bold text-slate-100">
+                                            {getSaleTotal(sale).toFixed(2)} <span className="text-blue-400 text-xs font-normal">DH</span>
+                                        </td>
+                                        <td className="p-4 text-center">
+                                            <button
+                                                onClick={() => setInvoiceSale(sale)}
+                                                className="p-2 text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 rounded-xl transition"
+                                                title="Imprimer Facture"
+                                            >
+                                                <Printer className="w-4 h-4 mx-auto" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
 
             {/* Modal Vente */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 print:hidden">
-                    <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-                        <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                            <ShoppingBag className="w-5 h-5 text-emerald-600" />
-                            Enregistrer une Vente
-                        </h2>
-                        <form onSubmit={handleSubmit} className="space-y-3">
+                <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 print:hidden">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
+                        <div className="flex justify-between items-center pb-4 border-b border-slate-800">
+                            <h2 className="text-lg font-bold text-white flex items-center gap-2.5">
+                                <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
+                                    <ShoppingBag className="w-5 h-5" />
+                                </div>
+                                Enregistrer une Vente
+                            </h2>
+                            <button 
+                                onClick={() => setShowModal(false)} 
+                                className="text-slate-400 hover:text-white p-1 hover:bg-slate-800 rounded-lg transition"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Nom du Client</label>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Nom du Client</label>
                                 <input
                                     type="text"
                                     required
                                     value={form.customer_name}
                                     onChange={(e) => setForm({ ...form, customer_name: e.target.value })}
-                                    className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Produit</label>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Produit</label>
                                 <select
                                     required
                                     value={form.product_id}
                                     onChange={(e) => setForm({ ...form, product_id: e.target.value })}
-                                    className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition cursor-pointer"
                                 >
                                     <option value="">Sélectionner un produit</option>
                                     {products.map((p) => (
@@ -243,24 +255,24 @@ export default function Sales() {
                                 </select>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Quantité</label>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Quantité</label>
                                     <input
                                         type="number"
                                         min="1"
                                         required
                                         value={form.quantity}
                                         onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-                                        className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                        className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Paiement</label>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Paiement</label>
                                     <select
                                         value={form.payment_type}
                                         onChange={(e) => setForm({ ...form, payment_type: e.target.value })}
-                                        className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                        className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition cursor-pointer"
                                     >
                                         <option value="Espèces">Espèces</option>
                                         <option value="Carte">Carte Bancaire</option>
@@ -269,20 +281,31 @@ export default function Sales() {
                                 </div>
                             </div>
 
-                            <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 flex justify-between items-center text-emerald-900">
+                            <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex justify-between items-center">
                                 <div>
-                                    <p className="text-xs text-emerald-600 font-medium">Prix Unitaire</p>
-                                    <p className="text-sm font-semibold">{unitPrice.toFixed(2)} DH</p>
+                                    <p className="text-xs text-slate-400 font-medium">Prix Unitaire</p>
+                                    <p className="text-sm font-semibold text-slate-200 mt-0.5">{unitPrice.toFixed(2)} DH</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="text-xs text-emerald-600 font-medium">Total à Payer</p>
-                                    <p className="text-lg font-bold text-emerald-700">{calculatedTotal} DH</p>
+                                    <p className="text-xs text-slate-400 font-medium">Total à Payer</p>
+                                    <p className="text-xl font-extrabold text-blue-400 mt-0.5">{calculatedTotal} DH</p>
                                 </div>
                             </div>
 
-                            <div className="flex gap-2 pt-2">
-                                <button type="button" onClick={() => setShowModal(false)} className="w-full border p-2 rounded-xl text-sm hover:bg-gray-50 transition">Annuler</button>
-                                <button type="submit" className="w-full bg-emerald-600 text-white p-2 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition">Valider & Facturer</button>
+                            <div className="flex gap-3 pt-3 border-t border-slate-800">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowModal(false)}
+                                    className="w-full border border-slate-800 text-slate-300 hover:bg-slate-800 py-3 rounded-xl text-sm font-semibold transition"
+                                >
+                                    Annuler
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-3 rounded-xl text-sm font-semibold shadow-lg shadow-blue-600/25 transition"
+                                >
+                                    Valider & Facturer
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -291,78 +314,87 @@ export default function Sales() {
 
             {/* Modal / Vue Facture à Imprimer */}
             {invoiceSale && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 print:p-0 print:static print:bg-white">
-                    <div className="bg-white p-6 rounded-2xl max-w-md w-full shadow-2xl space-y-4 print:shadow-none print:w-full print:max-w-none print:p-0">
+                <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 print:p-0 print:static print:bg-white print:backdrop-none">
+                    <div className="bg-slate-900 border border-slate-800 p-6 rounded-3xl max-w-md w-full shadow-2xl space-y-4 print:shadow-none print:w-full print:max-w-none print:p-0 print:bg-white print:border-none print:text-black">
 
                         {/* Header Actions (hidden on print) */}
-                        <div className="flex justify-between items-center border-b pb-3 print:hidden">
-                            <h2 className="font-bold text-gray-800">Facture / Reçu de Vente</h2>
+                        <div className="flex justify-between items-center pb-3 border-b border-slate-800 print:hidden">
+                            <h2 className="font-bold text-white flex items-center gap-2">
+                                <Receipt className="w-5 h-5 text-blue-400" />
+                                Facture / Reçu de Vente
+                            </h2>
                             <div className="flex items-center gap-2">
-                                <button onClick={handlePrintInvoice} className="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1">
+                                <button 
+                                    onClick={handlePrintInvoice} 
+                                    className="bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition shadow-md shadow-blue-600/25"
+                                >
                                     <Printer className="w-3.5 h-3.5" /> Imprimer
                                 </button>
-                                <button onClick={() => setInvoiceSale(null)} className="text-gray-400 hover:text-gray-600">
+                                <button 
+                                    onClick={() => setInvoiceSale(null)} 
+                                    className="text-slate-400 hover:text-white p-1 hover:bg-slate-800 rounded-lg transition"
+                                >
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
                         </div>
 
                         {/* Content Ticket / Facture */}
-                        <div className="text-xs text-gray-800 space-y-4 border p-4 rounded-xl print:border-none print:p-0">
-                            <div className="text-center space-y-1 border-b pb-3">
-                                <h2 className="text-base font-bold uppercase tracking-wide text-emerald-700">{paraInfo.name || 'Ma Parapharmacie'}</h2>
-                                <p className="text-gray-500">{paraInfo.address || 'Adresse non renseignée'}</p>
-                                <p className="text-gray-500">Tél: {paraInfo.phone || '0500000000'}</p>
-                                {paraInfo.ice && <p className="text-gray-400 text-[10px]">ICE: {paraInfo.ice}</p>}
+                        <div className="text-xs space-y-4 border border-slate-800 p-5 rounded-2xl bg-slate-950 print:bg-white print:text-black print:border-none print:p-0">
+                            <div className="text-center space-y-1 border-b border-slate-800 print:border-gray-200 pb-3">
+                                <h2 className="text-base font-extrabold uppercase tracking-wide text-blue-400 print:text-black">{paraInfo.name || 'Ma Parapharmacie'}</h2>
+                                <p className="text-slate-400 print:text-gray-600">{paraInfo.address || 'Adresse non renseignée'}</p>
+                                <p className="text-slate-400 print:text-gray-600">Tél: {paraInfo.phone || '0500000000'}</p>
+                                {paraInfo.ice && <p className="text-slate-500 print:text-gray-500 text-[10px]">ICE: {paraInfo.ice}</p>}
                             </div>
 
-                            <div className="flex justify-between text-[11px] text-gray-600 border-b pb-2">
+                            <div className="flex justify-between text-[11px] text-slate-300 print:text-gray-700 border-b border-slate-800 print:border-gray-200 pb-3">
                                 <div>
-                                    <p><strong>Facture N°:</strong> #{invoiceSale.id || 'N/A'}</p>
-                                    <p><strong>Client:</strong> {invoiceSale.customer_name || 'Client Passager'}</p>
+                                    <p><strong className="text-slate-200 print:text-black">Facture N°:</strong> #{invoiceSale.id || 'N/A'}</p>
+                                    <p><strong className="text-slate-200 print:text-black">Client:</strong> {invoiceSale.customer_name || 'Client Passager'}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p><strong>Date:</strong> {invoiceSale.created_at ? new Date(invoiceSale.created_at).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR')}</p>
-                                    <p><strong>Paiement:</strong> {invoiceSale.payment_type || 'Espèces'}</p>
+                                    <p><strong className="text-slate-200 print:text-black">Date:</strong> {invoiceSale.created_at ? new Date(invoiceSale.created_at).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR')}</p>
+                                    <p><strong className="text-slate-200 print:text-black">Paiement:</strong> {invoiceSale.payment_type || 'Espèces'}</p>
                                 </div>
                             </div>
 
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="border-b text-[10px] text-gray-500 uppercase">
-                                        <th className="py-1">Article</th>
-                                        <th className="py-1 text-center">Qté</th>
-                                        <th className="py-1 text-right">P.U</th>
-                                        <th className="py-1 text-right">Total</th>
+                                    <tr className="border-b border-slate-800 print:border-gray-200 text-[10px] text-slate-400 print:text-gray-500 uppercase">
+                                        <th className="py-2">Article</th>
+                                        <th className="py-2 text-center">Qté</th>
+                                        <th className="py-2 text-right">P.U</th>
+                                        <th className="py-2 text-right">Total</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y">
+                                <tbody className="divide-y divide-slate-800/60 print:divide-gray-200 text-slate-200 print:text-black">
                                     {invoiceSale.items && invoiceSale.items.length > 0 ? (
                                         invoiceSale.items.map((item, i) => (
                                             <tr key={i}>
-                                                <td className="py-1.5 font-medium">{item.product?.name || item.name || `Produit #${item.product_id}`}</td>
-                                                <td className="py-1.5 text-center">{item.quantity}</td>
-                                                <td className="py-1.5 text-right">{parseFloat(item.price || item.unit_price || 0).toFixed(2)}</td>
-                                                <td className="py-1.5 text-right font-semibold">{((item.price || item.unit_price || 0) * item.quantity).toFixed(2)} DH</td>
+                                                <td className="py-2 font-medium">{item.product?.name || item.name || `Produit #${item.product_id}`}</td>
+                                                <td className="py-2 text-center">{item.quantity}</td>
+                                                <td className="py-2 text-right">{parseFloat(item.price || item.unit_price || 0).toFixed(2)}</td>
+                                                <td className="py-2 text-right font-semibold">{((item.price || item.unit_price || 0) * item.quantity).toFixed(2)} DH</td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td className="py-1.5 font-medium">{invoiceSale.product_name || 'Article'}</td>
-                                            <td className="py-1.5 text-center">{invoiceSale.quantity || 1}</td>
-                                            <td className="py-1.5 text-right">{getSaleTotal(invoiceSale).toFixed(2)}</td>
-                                            <td className="py-1.5 text-right font-semibold">{getSaleTotal(invoiceSale).toFixed(2)} DH</td>
+                                            <td className="py-2 font-medium">{invoiceSale.product_name || 'Article'}</td>
+                                            <td className="py-2 text-center">{invoiceSale.quantity || 1}</td>
+                                            <td className="py-2 text-right">{getSaleTotal(invoiceSale).toFixed(2)}</td>
+                                            <td className="py-2 text-right font-semibold">{getSaleTotal(invoiceSale).toFixed(2)} DH</td>
                                         </tr>
                                     )}
                                 </tbody>
                             </table>
 
-                            <div className="border-t pt-2 flex justify-between items-center text-sm font-bold">
-                                <span>TOTAL A PAYER:</span>
-                                <span className="text-emerald-700">{getSaleTotal(invoiceSale).toFixed(2)} DH</span>
+                            <div className="border-t border-slate-800 print:border-gray-200 pt-3 flex justify-between items-center text-sm font-bold">
+                                <span className="text-slate-200 print:text-black">TOTAL A PAYER:</span>
+                                <span className="text-blue-400 print:text-black text-base">{getSaleTotal(invoiceSale).toFixed(2)} DH</span>
                             </div>
 
-                            <div className="text-center pt-4 text-gray-400 text-[10px] border-t">
+                            <div className="text-center pt-4 text-slate-500 print:text-gray-500 text-[10px] border-t border-slate-800 print:border-gray-200 space-y-0.5">
                                 <p>Merci pour votre visite !</p>
                                 <p>Les articles vendus ne sont ni repris ni échangés.</p>
                             </div>

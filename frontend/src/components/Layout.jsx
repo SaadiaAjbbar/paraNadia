@@ -7,7 +7,8 @@ import {
     Layers,
     LogOut,
     DollarSign,
-    Settings as SettingsIcon
+    Settings as SettingsIcon,
+    Sparkles
 } from 'lucide-react';
 
 export default function Layout({ onLogout }) {
@@ -24,16 +25,27 @@ export default function Layout({ onLogout }) {
     ];
 
     return (
-        <div className="min-h-screen flex bg-gray-50">
-            {/* Sidebar */}
-            <aside className="w-64 bg-emerald-900 text-white flex flex-col justify-between">
+        <div className="min-h-screen flex bg-slate-900 text-slate-100 font-sans antialiased">
+            {/* Sidebar Dark Blue Gradient */}
+            <aside className="w-72 bg-gradient-to-b from-slate-950 via-slate-900 to-blue-950 border-r border-slate-800/80 flex flex-col justify-between shadow-2xl relative z-20">
                 <div>
-                    <div className="p-6 text-center border-b border-emerald-800">
-                        <h1 className="text-xl font-bold text-emerald-100">Parapharmacie</h1>
-                        <p className="text-xs text-emerald-400 mt-1">Espace Admin</p>
+                    {/* Header */}
+                    <div className="p-6 border-b border-slate-800/60 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            
+                            <div>
+                                <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-300">
+                                    Parapharmacie NADIA
+                                </h1>
+                                <span className="inline-block px-2 py-0.5 text-[10px] font-semibold text-blue-400 bg-blue-950/80 border border-blue-800/50 rounded-full">
+                                    Espace Admin
+                                </span>
+                            </div>
+                        </div>
                     </div>
 
-                    <nav className="mt-6 px-4 space-y-1">
+                    {/* Navigation */}
+                    <nav className="mt-6 px-4 space-y-1.5">
                         {navItems.map((item) => {
                             const Icon = item.icon;
                             const isActive = location.pathname === item.path;
@@ -41,33 +53,39 @@ export default function Layout({ onLogout }) {
                                 <Link
                                     key={item.path}
                                     to={item.path}
-                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition ${isActive
-                                        ? 'bg-emerald-700 text-white shadow-md'
-                                        : 'text-emerald-200 hover:bg-emerald-800 hover:text-white'
+                                    className={`relative flex items-center gap-3.5 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 ${isActive
+                                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-600/30 font-semibold'
+                                            : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/50'
                                         }`}
                                 >
-                                    <Icon className="w-5 h-5" />
-                                    {item.name}
+                                    <Icon className={`w-5 h-5 transition-transform duration-300 ${isActive ? 'scale-110' : ''}`} />
+                                    <span>{item.name}</span>
+                                    {isActive && (
+                                        <div className="absolute right-3 w-1.5 h-1.5 rounded-full bg-white shadow-sm shadow-white" />
+                                    )}
                                 </Link>
                             );
                         })}
                     </nav>
                 </div>
 
-                <div className="p-4 border-t border-emerald-800">
+                {/* Footer Logout */}
+                <div className="p-4 border-t border-slate-800/60 bg-slate-950/40 backdrop-blur-md">
                     <button
                         onClick={onLogout}
-                        className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl font-medium transition shadow"
+                        className="w-full flex items-center justify-center gap-2.5 bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white py-3 rounded-xl text-sm font-semibold transition-all duration-300 border border-rose-500/20 hover:border-transparent shadow-sm hover:shadow-rose-600/20"
                     >
                         <LogOut className="w-4 h-4" />
-                        Déconnexion
+                        <span>Déconnexion</span>
                     </button>
                 </div>
             </aside>
 
             {/* Main Content Area */}
-            <main className="flex-1 p-8 overflow-y-auto">
-                <Outlet />
+            <main className="flex-1 bg-slate-950/50 p-8 overflow-y-auto relative">
+                <div className="max-w-7xl mx-auto">
+                    <Outlet />
+                </div>
             </main>
         </div>
     );

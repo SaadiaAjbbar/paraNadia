@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../api/axios';
-import { Plus, Calendar, Clock, User, Phone, CheckCircle, XCircle } from 'lucide-react';
+import { Plus, Calendar, Clock, Phone, CheckCircle, XCircle, X, Sparkles } from 'lucide-react';
 
 export default function Reservations() {
     const [reservations, setReservations] = useState([]);
@@ -8,7 +8,6 @@ export default function Reservations() {
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
 
-    // تعريف واحد فقط للـ Form State
     const [form, setForm] = useState({
         client_name: '',
         phone: '',
@@ -72,127 +71,156 @@ export default function Reservations() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="flex justify-between items-center">
+        <div className="space-y-8">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Gestion des Réservations</h1>
-                    <p className="text-gray-500 text-sm">Prise de rendez-vous pour les soins et consultations</p>
+                    <h1 className="text-3xl font-extrabold text-white tracking-tight">Gestion des Réservations</h1>
+                    <p className="text-slate-400 text-sm mt-1">Prise de rendez-vous pour les soins et consultations</p>
                 </div>
                 <button
                     onClick={() => setShowModal(true)}
-                    className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-4 py-2.5 rounded-xl transition flex items-center gap-2"
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold px-5 py-3 rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/25 flex items-center justify-center gap-2 active:scale-[0.98]"
                 >
-                    <Plus className="w-4 h-4" /> Nouvelle Réservation
+                    <Plus className="w-5 h-5" /> Nouvelle Réservation
                 </button>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* Table */}
+            <div className="bg-slate-900/80 backdrop-blur-xl rounded-2xl border border-slate-800 shadow-xl shadow-black/20 overflow-hidden">
                 {loading ? (
-                    <div className="p-8 text-center text-gray-500">Chargement des réservations...</div>
+                    <div className="p-12 text-center text-slate-500 animate-pulse">Chargement des réservations...</div>
                 ) : reservations.length === 0 ? (
-                    <div className="p-8 text-center text-gray-400">Aucune réservation trouvée</div>
+                    <div className="p-12 text-center text-slate-500">Aucune réservation trouvée</div>
                 ) : (
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-50 border-b border-gray-100 text-gray-500 text-xs uppercase tracking-wider">
-                                <th className="p-4">Client</th>
-                                <th className="p-4">Service</th>
-                                <th className="p-4">Date & Heure</th>
-                                <th className="p-4">Statut</th>
-                                <th className="p-4 text-right">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100 text-sm">
-                            {reservations.map((item) => (
-                                <tr key={item.id} className="hover:bg-gray-50/50 transition">
-                                    <td className="p-4">
-                                        <p className="font-semibold text-gray-800">{item.client_name}</p>
-                                        <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
-                                            <Phone className="w-3 h-3" /> {item.phone}
-                                        </p>
-                                    </td>
-                                    <td className="p-4 font-medium text-gray-700">
-                                        {item.service?.name || item.service_name || 'Service'}
-                                    </td>
-                                    <td className="p-4 text-gray-600">
-                                        <div className="flex items-center gap-1.5">
-                                            <Calendar className="w-3.5 h-3.5 text-gray-400" />
-                                            <span>{item.reservation_date || item.date}</span>
-                                            <Clock className="w-3.5 h-3.5 text-gray-400 ml-2" />
-                                            <span>{item.time_slot || item.time}</span>
-                                        </div>
-                                    </td>
-                                    <td className="p-4">
-                                        <span
-                                            className={`px-2.5 py-1 rounded-full text-xs font-semibold ${item.status === 'confirmed'
-                                                    ? 'bg-emerald-50 text-emerald-600'
-                                                    : item.status === 'cancelled'
-                                                        ? 'bg-red-50 text-red-600'
-                                                        : 'bg-amber-50 text-amber-600'
-                                                }`}
-                                        >
-                                            {item.status === 'confirmed' ? 'Confirmée' : item.status === 'cancelled' ? 'Annulée' : 'En attente'}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 text-right space-x-2">
-                                        {item.status !== 'confirmed' && (
-                                            <button
-                                                onClick={() => handleStatusChange(item.id, 'confirmed')}
-                                                className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg transition"
-                                                title="Confirmer"
-                                            >
-                                                <CheckCircle className="w-4 h-4" />
-                                            </button>
-                                        )}
-                                        {item.status !== 'cancelled' && (
-                                            <button
-                                                onClick={() => handleStatusChange(item.id, 'cancelled')}
-                                                className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition"
-                                                title="Annuler"
-                                            >
-                                                <XCircle className="w-4 h-4" />
-                                            </button>
-                                        )}
-                                    </td>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead>
+                                <tr className="border-b border-slate-800 bg-slate-950/40 text-slate-400 text-xs uppercase tracking-wider">
+                                    <th className="p-4">Client</th>
+                                    <th className="p-4">Service</th>
+                                    <th className="p-4">Date & Heure</th>
+                                    <th className="p-4">Statut</th>
+                                    <th className="p-4 text-right">Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-slate-800/60 text-sm">
+                                {reservations.map((item) => (
+                                    <tr key={item.id} className="hover:bg-slate-800/30 transition">
+                                        <td className="p-4">
+                                            <p className="font-semibold text-slate-100">{item.client_name}</p>
+                                            <p className="text-xs text-slate-400 flex items-center gap-1.5 mt-1">
+                                                <Phone className="w-3.5 h-3.5 text-slate-500" />
+                                                <span>{item.phone}</span>
+                                            </p>
+                                        </td>
+                                        <td className="p-4 font-medium text-slate-200">
+                                            {item.service?.name || item.service_name || 'Service'}
+                                        </td>
+                                        <td className="p-4 text-slate-300">
+                                            <div className="flex items-center gap-2 text-xs">
+                                                <span className="flex items-center gap-1 text-slate-300 bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-lg">
+                                                    <Calendar className="w-3.5 h-3.5 text-blue-400" />
+                                                    {item.reservation_date || item.date}
+                                                </span>
+                                                <span className="flex items-center gap-1 text-slate-300 bg-slate-950 border border-slate-800 px-2.5 py-1 rounded-lg">
+                                                    <Clock className="w-3.5 h-3.5 text-indigo-400" />
+                                                    {item.time_slot || item.time}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="p-4">
+                                            <span
+                                                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
+                                                    item.status === 'confirmed'
+                                                        ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/30'
+                                                        : item.status === 'cancelled'
+                                                        ? 'bg-rose-950/40 text-rose-400 border-rose-500/30'
+                                                        : 'bg-amber-950/40 text-amber-400 border-amber-500/30'
+                                                }`}
+                                            >
+                                                {item.status === 'confirmed' ? 'Confirmée' : item.status === 'cancelled' ? 'Annulée' : 'En attente'}
+                                            </span>
+                                        </td>
+                                        <td className="p-4 text-right space-x-1">
+                                            {item.status !== 'confirmed' && (
+                                                <button
+                                                    onClick={() => handleStatusChange(item.id, 'confirmed')}
+                                                    className="p-2 text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-xl transition"
+                                                    title="Confirmer"
+                                                >
+                                                    <CheckCircle className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                            {item.status !== 'cancelled' && (
+                                                <button
+                                                    onClick={() => handleStatusChange(item.id, 'cancelled')}
+                                                    className="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-xl transition"
+                                                    title="Annuler"
+                                                >
+                                                    <XCircle className="w-4 h-4" />
+                                                </button>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
 
+            {/* Modal */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-                    <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-                        <h2 className="text-lg font-bold text-gray-800">Ajouter une Réservation</h2>
-                        <form onSubmit={handleSubmit} className="space-y-3">
+                <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
+                        <div className="flex justify-between items-center pb-4 border-b border-slate-800">
+                            <h2 className="text-lg font-bold text-white flex items-center gap-2.5">
+                                <div className="p-2 bg-blue-500/10 text-blue-400 rounded-xl">
+                                    <Sparkles className="w-5 h-5" />
+                                </div>
+                                Ajouter une Réservation
+                            </h2>
+                            <button 
+                                onClick={() => setShowModal(false)} 
+                                className="text-slate-400 hover:text-white p-1 hover:bg-slate-800 rounded-lg transition"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Nom du client</label>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Nom du client</label>
                                 <input
                                     type="text"
                                     required
                                     value={form.client_name}
                                     onChange={(e) => setForm({ ...form, client_name: e.target.value })}
-                                    className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                    placeholder="Ex: Fatima Zahra"
+                                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
                                 />
                             </div>
+
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Téléphone</label>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Téléphone</label>
                                 <input
                                     type="text"
                                     required
                                     value={form.phone}
                                     onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                                    className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                    placeholder="06XXXXXXXX"
+                                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
                                 />
                             </div>
+
                             <div>
-                                <label className="block text-xs font-medium text-gray-600 mb-1">Service</label>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Service</label>
                                 <select
                                     required
                                     value={form.service_id}
                                     onChange={(e) => setForm({ ...form, service_id: e.target.value })}
-                                    className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition cursor-pointer"
                                 >
                                     <option value="">Sélectionner un service</option>
                                     {services.map((s) => (
@@ -202,39 +230,41 @@ export default function Reservations() {
                                     ))}
                                 </select>
                             </div>
-                            <div className="grid grid-cols-2 gap-2">
+
+                            <div className="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Date</label>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Date</label>
                                     <input
                                         type="date"
                                         required
                                         value={form.reservation_date}
                                         onChange={(e) => setForm({ ...form, reservation_date: e.target.value })}
-                                        className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                        className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-xs font-medium text-gray-600 mb-1">Heure</label>
+                                    <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Heure</label>
                                     <input
                                         type="time"
                                         required
                                         value={form.time_slot}
                                         onChange={(e) => setForm({ ...form, time_slot: e.target.value })}
-                                        className="w-full border p-2 rounded-xl text-sm outline-none focus:border-emerald-500"
+                                        className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition"
                                     />
                                 </div>
                             </div>
-                            <div className="flex gap-2 pt-2">
+
+                            <div className="flex gap-3 pt-3 border-t border-slate-800">
                                 <button
                                     type="button"
                                     onClick={() => setShowModal(false)}
-                                    className="w-full border p-2 rounded-xl text-sm hover:bg-gray-50 transition"
+                                    className="w-full border border-slate-800 text-slate-300 hover:bg-slate-800 py-3 rounded-xl text-sm font-semibold transition"
                                 >
                                     Annuler
                                 </button>
                                 <button
                                     type="submit"
-                                    className="w-full bg-emerald-600 text-white p-2 rounded-xl text-sm font-semibold hover:bg-emerald-700 transition"
+                                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-3 rounded-xl text-sm font-semibold shadow-lg shadow-blue-600/25 transition"
                                 >
                                     Enregistrer
                                 </button>
