@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import { DollarSign, ShoppingBag, Calendar, AlertTriangle, TrendingUp } from 'lucide-react';
 
 export default function Dashboard() {
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         api.get('/dashboard/stats')
@@ -23,28 +25,33 @@ export default function Dashboard() {
             value: `${data?.kpis?.total_revenue || 0} DH`,
             icon: DollarSign,
             gradient: 'from-blue-600 to-indigo-600',
-            shadow: 'shadow-blue-500/20'
+            shadow: 'shadow-blue-500/20',
+            onClick: null
         },
         {
             title: 'Commandes',
             value: data?.kpis?.total_orders || 0,
             icon: ShoppingBag,
             gradient: 'from-indigo-600 to-purple-600',
-            shadow: 'shadow-indigo-500/20'
+            shadow: 'shadow-indigo-500/20',
+            onClick: null
         },
         {
             title: 'Réservations',
             value: data?.kpis?.total_reservations || 0,
             icon: Calendar,
             gradient: 'from-cyan-600 to-blue-600',
-            shadow: 'shadow-cyan-500/20'
+            shadow: 'shadow-cyan-500/20',
+            onClick: null
         },
         {
             title: 'Alerte Stock',
             value: data?.low_stock_alert?.length || 0,
             icon: AlertTriangle,
             gradient: 'from-amber-500 to-orange-600',
-            shadow: 'shadow-amber-500/20'
+            shadow: 'shadow-amber-500/20',
+            onClick: () => navigate('/products?filter=low_stock'),
+            clickable: true
         },
     ];
 
@@ -68,11 +75,17 @@ export default function Dashboard() {
                     return (
                         <div
                             key={idx}
-                            className="bg-slate-900/80 backdrop-blur-xl p-6 rounded-2xl border border-slate-800 shadow-xl shadow-black/20 flex items-center justify-between hover:border-slate-700 transition duration-300 group"
+                            onClick={kpi.onClick || undefined}
+                            className={`bg-slate-900/80 backdrop-blur-xl p-6 rounded-2xl border border-slate-800 shadow-xl shadow-black/20 flex items-center justify-between transition duration-300 group ${
+                                kpi.clickable ? 'cursor-pointer hover:border-amber-500/50 hover:bg-slate-800/80' : 'hover:border-slate-700'
+                            }`}
                         >
                             <div>
                                 <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{kpi.title}</p>
                                 <p className="text-2xl font-bold text-white mt-2 group-hover:scale-105 transition-transform">{kpi.value}</p>
+                                {kpi.clickable && (
+                                    <span className="text-[10px] text-amber-400 mt-1 inline-block hover:underline">Voir les produits &rarr;</span>
+                                )}
                             </div>
                             <div className={`bg-gradient-to-tr ${kpi.gradient} p-3.5 rounded-2xl text-white shadow-lg ${kpi.shadow}`}>
                                 <Icon className="w-6 h-6" />

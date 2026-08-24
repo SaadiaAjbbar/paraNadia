@@ -1,14 +1,18 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api/axios';
-import { Plus, Search, AlertCircle, Image as ImageIcon, X, Package } from 'lucide-react';
+import { Plus, Search, AlertCircle, Image as ImageIcon, X, Package, RefreshCw } from 'lucide-react';
 
 export default function Products() {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
+    const [filterLowStock, setFilterLowStock] = useState(searchParams.get('filter') === 'low_stock');
 
+    // State pour Modal Ajouter Produit
     const [showModal, setShowModal] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -20,13 +24,25 @@ export default function Products() {
         image: null,
     });
 
+    // State pour Modal Quick Stock Update
+    const [stockModal, setStockModal] = useState({ show: false, product: null, addStock: '' });
+    const [updatingStock, setUpdatingStock] = useState(false);
+
+    useEffect(() => {
+        setFilterLowStock(searchParams.get('filter') === 'low_stock');
+    }, [searchParams]);
+
     const fetchProducts = async () => {
         try {
             setLoading(true);
             const res = await api.get('/products', {
                 params: { search, category_id: selectedCategory }
             });
-            setProducts(res.data.data || res.data);
+            let data = res.data.data || res.data;
+            if (filterLowStock) {
+                data = data.filter(item => Number(item.stock) <= Number(item.min_stock));
+            }
+            setProducts(data);
         } catch (err) {
             console.error('Erreur lors du chargement des produits', err);
         } finally {
@@ -49,7 +65,7 @@ export default function Products() {
 
     useEffect(() => {
         fetchProducts();
-    }, [search, selectedCategory]);
+    }, [search, selectedCategory, filterLowStock]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -72,6 +88,26 @@ export default function Products() {
         }
     };
 
+    // Quick Update Stock Function
+    const handleUpdateStock = async (e) => {
+        e.preventDefault();
+        if (!stockModal.product || !stockModal.addStock) return;
+
+        try {
+            setUpdatingStock(true);
+            const newStock = Number(stockModal.product.stock) + Number(stockModal.addStock);
+            await api.put(`/products/${stockModal.product.id}`, {
+                stock: newStock
+            });
+            setStockModal({ show: false, product: null, addStock: '' });
+            fetchProducts();
+        } catch (err) {
+            alert(err.response?.data?.message || 'Erreur lors de la mise à jour du stock');
+        } finally {
+            setUpdatingStock(false);
+        }
+    };
+
     return (
         <div className="space-y-8">
             {/* Header */}
@@ -89,27 +125,50 @@ export default function Products() {
             </div>
 
             {/* Filters */}
-            <div className="bg-slate-900/80 backdrop-blur-xl p-4 rounded-2xl border border-slate-800 shadow-xl shadow-black/20 flex flex-col md:flex-row gap-4">
-                <div className="relative flex-1">
-                    <Search className="w-5 h-5 absolute left-3.5 top-3 text-slate-500" />
-                    <input
-                        type="text"
-                        placeholder="Rechercher un produit..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
-                    />
+            <div className="bg-slate-900/80 backdrop-blur-xl p-4 rounded-2xl border border-slate-800 shadow-xl shadow-black/20 flex flex-col md:flex-row gap-4 justify-between">
+                <div className="flex flex-col md:flex-row gap-4 flex-1">
+                    <div className="relative flex-1">
+                        <Search className="w-5 h-5 absolute left-3.5 top-3 text-slate-500" />
+                        <input
+                            type="text"
+                            placeholder="Rechercher un produit..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pl-11 pr-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 text-sm focus:outline-none focus:border-blue-500 transition"
+                        />
+                    </div>
+                    <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className="px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-blue-500 transition cursor-pointer"
+                    >
+                        <option value="">Toutes les catégories</option>
+                        {categories.map((cat) => (
+                            <option key={cat.id} value={cat.id}>{cat.name}</option>
+                        ))}
+                    </select>
                 </div>
-                <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    className="px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-200 text-sm focus:outline-none focus:border-blue-500 transition cursor-pointer"
+
+                {/* Toggle Filter Low Stock */}
+                <button
+                    onClick={() => {
+                        const newState = !filterLowStock;
+                        setFilterLowStock(newState);
+                        if (newState) {
+                            setSearchParams({ filter: 'low_stock' });
+                        } else {
+                            setSearchParams({});
+                        }
+                    }}
+                    className={`px-4 py-2.5 rounded-xl border text-xs font-semibold flex items-center gap-2 transition ${
+                        filterLowStock
+                            ? 'bg-amber-500/20 border-amber-500/50 text-amber-400'
+                            : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'
+                    }`}
                 >
-                    <option value="">Toutes les catégories</option>
-                    {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                    ))}
-                </select>
+                    <AlertCircle className="w-4 h-4" />
+                    {filterLowStock ? 'Affichage: Stock Bas uniquement' : 'Filtrer: Stock Bas'}
+                </button>
             </div>
 
             {/* Table */}
@@ -126,56 +185,115 @@ export default function Products() {
                                     <th className="p-4">Prix</th>
                                     <th className="p-4">Stock</th>
                                     <th className="p-4">Statut</th>
+                                    <th className="p-4 text-right">Actions</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-800/60 text-sm">
-                                {products.map((item) => {
-                                    const isLowStock = Number(item.stock) <= Number(item.min_stock);
-                                    return (
-                                        <tr key={item.id} className="hover:bg-slate-800/30 transition">
-                                            <td className="p-4 flex items-center gap-3.5">
-                                                {item.image ? (
-                                                    <img src={`http://localhost:8000/storage/${item.image}`} alt={item.name} className="w-11 h-11 rounded-xl object-cover border border-slate-800" />
-                                                ) : (
-                                                    <div className="w-11 h-11 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center text-slate-600">
-                                                        <ImageIcon className="w-5 h-5" />
+                                {products.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" className="p-8 text-center text-slate-500">Aucun produit trouvé</td>
+                                    </tr>
+                                ) : (
+                                    products.map((item) => {
+                                        const isLowStock = Number(item.stock) <= Number(item.min_stock);
+                                        return (
+                                            <tr key={item.id} className="hover:bg-slate-800/30 transition">
+                                                <td className="p-4 flex items-center gap-3.5">
+                                                    {item.image ? (
+                                                        <img src={`http://localhost:8000/storage/${item.image}`} alt={item.name} className="w-11 h-11 rounded-xl object-cover border border-slate-800" />
+                                                    ) : (
+                                                        <div className="w-11 h-11 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center text-slate-600">
+                                                            <ImageIcon className="w-5 h-5" />
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        <p className="font-semibold text-slate-100">{item.name}</p>
+                                                        <p className="text-xs text-slate-400 truncate max-w-xs mt-0.5">{item.description || 'Pas de description'}</p>
                                                     </div>
-                                                )}
-                                                <div>
-                                                    <p className="font-semibold text-slate-100">{item.name}</p>
-                                                    <p className="text-xs text-slate-400 truncate max-w-xs mt-0.5">{item.description || 'Pas de description'}</p>
-                                                </div>
-                                            </td>
-                                            <td className="p-4 text-slate-300 font-medium">{item.category?.name || '-'}</td>
-                                            <td className="p-4 font-bold text-slate-100">
-                                                {item.price} <span className="text-blue-400 text-xs font-normal">DH</span>
-                                            </td>
-                                            <td className="p-4">
-                                                <span className={`font-semibold ${isLowStock ? 'text-rose-400' : 'text-slate-300'}`}>
-                                                    {item.stock} <span className="text-xs font-normal text-slate-500">unités</span>
-                                                </span>
-                                            </td>
-                                            <td className="p-4">
-                                                {isLowStock ? (
-                                                    <span className="inline-flex items-center gap-1.5 bg-rose-950/40 text-rose-400 border border-rose-500/30 px-3 py-1 rounded-full text-xs font-semibold">
-                                                        <AlertCircle className="w-3.5 h-3.5" /> Stock Bas
+                                                </td>
+                                                <td className="p-4 text-slate-300 font-medium">{item.category?.name || '-'}</td>
+                                                <td className="p-4 font-bold text-slate-100">
+                                                    {item.price} <span className="text-blue-400 text-xs font-normal">DH</span>
+                                                </td>
+                                                <td className="p-4">
+                                                    <span className={`font-semibold ${isLowStock ? 'text-rose-400' : 'text-slate-300'}`}>
+                                                        {item.stock} <span className="text-xs font-normal text-slate-500">unités</span>
                                                     </span>
-                                                ) : (
-                                                    <span className="inline-flex items-center gap-1.5 bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold">
-                                                        En Stock
-                                                    </span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
+                                                </td>
+                                                <td className="p-4">
+                                                    {isLowStock ? (
+                                                        <span className="inline-flex items-center gap-1.5 bg-rose-950/40 text-rose-400 border border-rose-500/30 px-3 py-1 rounded-full text-xs font-semibold">
+                                                            <AlertCircle className="w-3.5 h-3.5" /> Stock Bas
+                                                        </span>
+                                                    ) : (
+                                                        <span className="inline-flex items-center gap-1.5 bg-emerald-950/40 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold">
+                                                            En Stock
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="p-4 text-right">
+                                                    <button
+                                                        onClick={() => setStockModal({ show: true, product: item, addStock: '' })}
+                                                        className="px-3 py-1.5 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/20 rounded-lg text-xs font-semibold transition inline-flex items-center gap-1.5"
+                                                    >
+                                                        <RefreshCw className="w-3.5 h-3.5" /> + Stock
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
                             </tbody>
                         </table>
                     </div>
                 )}
             </div>
 
-            {/* Modal Form */}
+            {/* Modal Quick Stock Update */}
+            {stockModal.show && (
+                <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
+                    <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4">
+                        <div className="flex justify-between items-center pb-3 border-b border-slate-800">
+                            <h2 className="text-base font-bold text-white flex items-center gap-2">
+                                <RefreshCw className="w-4 h-4 text-blue-400" /> Recharger le Stock
+                            </h2>
+                            <button onClick={() => setStockModal({ show: false, product: null, addStock: '' })} className="text-slate-400 hover:text-white">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div className="text-sm">
+                            <p className="text-slate-400">Produit: <span className="text-white font-semibold">{stockModal.product?.name}</span></p>
+                            <p className="text-slate-400">Stock actuel: <span className="text-blue-400 font-bold">{stockModal.product?.stock}</span></p>
+                        </div>
+
+                        <form onSubmit={handleUpdateStock} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1.5">Quantité à ajouter</label>
+                                <input
+                                    type="number"
+                                    required
+                                    min="1"
+                                    placeholder="Ex: 10"
+                                    value={stockModal.addStock}
+                                    onChange={(e) => setStockModal({ ...stockModal, addStock: e.target.value })}
+                                    className="w-full px-3.5 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 text-sm focus:outline-none focus:border-blue-500 transition"
+                                />
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={updatingStock}
+                                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-blue-600/25 transition disabled:opacity-50"
+                            >
+                                {updatingStock ? 'Mise à jour...' : 'Ajouter au Stock'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Form Ajouter Produit */}
             {showModal && (
                 <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
                     <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5">
