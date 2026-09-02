@@ -40,7 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::apiResource('categories', CategoryController::class);
 
         // Orders / Sales
-        Route::apiResource('orders', OrderController::class)->except(['update', 'destroy']);
+        Route::apiResource('orders', OrderController::class)->except(['update']);
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
 
         // Services & Reservations

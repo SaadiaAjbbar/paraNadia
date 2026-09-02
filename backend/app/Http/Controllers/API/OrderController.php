@@ -10,7 +10,6 @@ use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    // عرض جميع الطلبيات للأدمن
     public function index()
     {
         $orders = Order::with('items.product')->latest()->get();
@@ -18,7 +17,6 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 
-    // إنشاء طلبية جديدة
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -35,7 +33,6 @@ class OrderController extends Controller
             $totalAmount = 0;
             $itemsData = [];
 
-            // التحقق من التوفر فـ الـ Stock وحساب التكلفة الإجمالية
             foreach ($validated['items'] as $item) {
                 $product = Product::findOrFail($item['product_id']);
 
@@ -55,7 +52,6 @@ class OrderController extends Controller
                 ];
             }
 
-            // إنشاء الطلب
             $order = Order::create([
                 'user_id' => $request->user()?->id,
                 'customer_name' => $validated['customer_name'],
@@ -66,7 +62,6 @@ class OrderController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
-            // إضافة المنتجات للطلب وتنقيص الـ Stock
             foreach ($itemsData as $data) {
                 $order->items()->create([
                     'product_id' => $data['product']->id,
@@ -85,13 +80,11 @@ class OrderController extends Controller
         });
     }
 
-    // تفاصيل طلبية معينة
     public function show(Order $order)
     {
         return response()->json($order->load('items.product'));
     }
 
-    // تحديث حالة الطلبية (pending, processing, completed, cancelled)
     public function updateStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
@@ -103,6 +96,23 @@ class OrderController extends Controller
         return response()->json([
             'message' => 'Statut de la commande mis à jour',
             'order' => $order,
+        ]);
+    }
+
+    public function destroy(Order $order)
+    {
+        DB::transaction(function () use ($order) {
+            if ($order->status !== 'cancelled') {
+                foreach ($order->items as $item) {
+                    Product::where('id', $item->product_id)->increment('stock', $item->quantity);
+                }
+            }
+
+            $order->delete();
+        });
+
+        return response()->json([
+            'message' => 'Commande supprimée avec succès'
         ]);
     }
 }
