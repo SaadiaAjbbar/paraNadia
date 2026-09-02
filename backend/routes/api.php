@@ -21,31 +21,32 @@ Route::middleware('auth:sanctum')->group(function () {
         return $request->user();
     });
 
-    // Dashboard & Financial Reports
-    Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
-    Route::get('/dashboard/reports', [DashboardController::class, 'report']); // <--- Route
+    //  Routes just Admin )
+    Route::middleware('role:admin')->group(function () {
+        Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+        Route::get('/dashboard/reports', [DashboardController::class, 'report']);
+        Route::get('/parapharmacy-settings', [ParapharmacySettingController::class, 'show']);
+        Route::put('/parapharmacy-settings', [ParapharmacySettingController::class, 'update']);
+    });
 
-    // Products & Stock Management
-    Route::patch('/products/{product}/add-stock', [ProductController::class, 'addStock']); // <--- Route Restock
+    //  Routes  Admin et Vendeuse
+    Route::middleware('role:admin,vendeuse')->group(function () {
+        // Products & Stock Management
+        Route::patch('/products/{product}/add-stock', [ProductController::class, 'addStock']);
+        Route::get('/products/low-stock', [ProductController::class, 'lowStock']);
+        Route::apiResource('products', ProductController::class);
 
+        // Categories
+        Route::apiResource('categories', CategoryController::class);
 
-    // Services & Reservations
-    Route::apiResource('services', ServiceController::class);
-    Route::get('/reservations', [ReservationController::class, 'index']);
-    Route::post('/reservations', [ReservationController::class, 'store']);
-    Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus']);
+        // Orders / Sales
+        Route::apiResource('orders', OrderController::class)->except(['update', 'destroy']);
+        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
 
-    // Categories & Products
-    Route::apiResource('categories', CategoryController::class);
-    Route::get('/products/low-stock', [ProductController::class, 'lowStock']);
-    Route::apiResource('products', ProductController::class);
-
-    // Orders
-    Route::apiResource('orders', OrderController::class)->except(['update', 'destroy']);
-    Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
-
-    //para infos
-    Route::get('/parapharmacy-settings', [ParapharmacySettingController::class, 'show']);
-    Route::put('/parapharmacy-settings', [ParapharmacySettingController::class, 'update']);
-
+        // Services & Reservations
+        Route::apiResource('services', ServiceController::class);
+        Route::get('/reservations', [ReservationController::class, 'index']);
+        Route::post('/reservations', [ReservationController::class, 'store']);
+        Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus']);
+    });
 });
