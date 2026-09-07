@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     //  Routes  Admin et Vendeuse
+
     Route::middleware('role:admin,vendeuse')->group(function () {
         // Products & Stock Management
         Route::patch('/products/{product}/add-stock', [ProductController::class, 'addStock']);
