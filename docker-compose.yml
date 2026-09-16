@@ -1,13 +1,25 @@
 services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: parapharmacie_frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - webserver
+    networks:
+      - app-network
   app:
     build:
-      context: .
+      context: ./backend
       dockerfile: Dockerfile
     container_name: parapharmacie_app
     restart: unless-stopped
     working_dir: /var/www
     volumes:
-      - .:/var/www
+      - ./backend:/var/www
     networks:
       - app-network
 
@@ -18,8 +30,8 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - .:/var/www
-      - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ./backend:/var/www
+      - ./backend/nginx/conf.d/:/etc/nginx/conf.d/
     networks:
       - app-network
 
