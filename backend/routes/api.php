@@ -10,7 +10,7 @@ use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\ParapharmacySettingController;
-
+use Illuminate\Support\Facades\Artisan;
 // Routes العامة
 Route::post('/login', [AuthController::class, 'login']);
 
@@ -50,4 +50,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/reservations', [ReservationController::class, 'store']);
         Route::patch('/reservations/{reservation}/status', [ReservationController::class, 'updateStatus']);
     });
+});
+Route::get('/init-db', function () {
+    Artisan::call('migrate:fresh', [
+        '--seed' => true,
+        '--force' => true,
+    ]);
+
+    return response()->json([
+        'message' => 'Database migrated and seeded successfully!'
+    ]);
 });
