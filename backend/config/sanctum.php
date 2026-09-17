@@ -19,11 +19,11 @@ return [
     */
 
     'stateful' => explode(',', env('SANCTUM_STATEFUL_DOMAINS', sprintf(
-        '%s%s',
-        'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,::1',
-        Sanctum::currentApplicationUrlWithPort(),
-        // Sanctum::currentRequestHost(),
-    ))),
+    '%s%s',
+    'localhost,localhost:3000,127.0.0.1,127.0.0.1:8000,',
+    // زيدي هنا رابط الفرونت إند ديال Vercel بلا http://
+    'frontend-seven-chi-92.vercel.app'
+    ))),,
 
     /*
     |--------------------------------------------------------------------------

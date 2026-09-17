@@ -200,7 +200,7 @@ export default function Products() {
                                             <tr key={item.id} className="hover:bg-slate-800/30 transition">
                                                 <td className="p-4 flex items-center gap-3.5">
                                                     {item.image ? (
-                                                        <img src={`http://localhost:8000/storage/${item.image}`} alt={item.name} className="w-11 h-11 rounded-xl object-cover border border-slate-800" />
+                                                        <img src={`https://paranadia.onrender.com/storage/${product.image}`} alt={item.name} className="w-11 h-11 rounded-xl object-cover border border-slate-800" />
                                                     ) : (
                                                         <div className="w-11 h-11 bg-slate-950 border border-slate-800 rounded-xl flex items-center justify-center text-slate-600">
                                                             <ImageIcon className="w-5 h-5" />
