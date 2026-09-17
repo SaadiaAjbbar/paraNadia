@@ -29,6 +29,8 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 
 # Expose port and run Laravel built-in server
+# Expose default port
 EXPOSE 10000
 
-CMD php artisan config:clear && php artisan migrate:fresh --seed --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
+# Run migrations and start the server safely
+CMD sh -c "php artisan config:clear && php artisan migrate:fresh --seed --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}"
