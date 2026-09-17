@@ -2,20 +2,22 @@
 
 return [
 
-    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login', 'logout'],
+   'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'], // كيقبل جميع المصادر للـ Demo
+    'allowed_origins' => [
+    'https://frontend-seven-chi-92.vercel.app',
+    'http://localhost:3000',
+    ],
 
-    'allowed_origins_patterns' => [],
+   'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['*'],
+   'allowed_headers' => ['*'],
 
-    'exposed_headers' => [],
+   'exposed_headers' => [],
 
-    'max_age' => 0,
+   'max_age' => 0,
 
-    'supports_credentials' => false, // ملي كتديري '*' خاص تحوليها لـ false
-
+   'supports_credentials' => true,
 ];
