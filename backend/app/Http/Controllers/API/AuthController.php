@@ -10,6 +10,31 @@ use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
+    public function register(Request $request)
+{
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:6',
+        'role' => 'required|in:admin,vendeuse',
+    ]);
+
+    $user = User::create([
+        'name' => $request->name,
+        'email' => strtolower(trim($request->email)),
+        'password' => $request->password, // الـ Model داير 'hashed' cast
+        'role' => $request->role,
+    ]);
+
+    $token = $user->createToken('auth_token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'Compte créé avec succès',
+        'user' => $user,
+        'access_token' => $token,
+        'token_type' => 'Bearer',
+    ], 201);
+}
     public function login(Request $request)
     {
         $request->validate([

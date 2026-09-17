@@ -2,22 +2,24 @@
 
 return [
 
-   'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'register', 'login', 'logout'],
 
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-    'https://frontend-seven-chi-92.vercel.app',
-    'http://localhost:3000',
+        'https://frontend-seven-chi-92.vercel.app',
+        'http://localhost:5173',
+        'http://localhost:3000',
     ],
 
-   'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => [],
 
-   'allowed_headers' => ['*'],
+    'allowed_headers' => ['*'],
 
-   'exposed_headers' => [],
+    'exposed_headers' => [],
 
-   'max_age' => 0,
+    'max_age' => 0,
 
-   'supports_credentials' => true,
+    'supports_credentials' => true,
+
 ];

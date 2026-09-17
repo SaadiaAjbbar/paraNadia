@@ -12,6 +12,7 @@ use App\Http\Controllers\API\DashboardController;
 use App\Http\Controllers\ParapharmacySettingController;
 use Illuminate\Support\Facades\Artisan;
 // Routes العامة
+Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 // Routes المحمية بـ Token
