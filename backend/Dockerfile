@@ -29,5 +29,6 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 
 # Expose port and run Laravel built-in server
-EXPOSE 8000
-CMD php artisan serve --host=0.0.0.0 --port=8000
+EXPOSE 10000
+
+CMD php artisan config:clear && php artisan migrate:fresh --seed --force && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
