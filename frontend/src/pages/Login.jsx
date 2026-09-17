@@ -9,26 +9,33 @@ export default function Login({ onLoginSuccess }) {
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        setLoading(true);
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-        try {
-            const response = await api.post('/login', { email, password });
-            const { access_token, user } = response.data;
+    // تنظيف الإيميل وكلمة السر حيت الكلافي ديال التليفون كتدير Majuscule ومسافات
+    const emailClean = email.trim().toLowerCase();
+    const passwordClean = password.trim();
 
-            localStorage.setItem('token', access_token);
-            localStorage.setItem('user', JSON.stringify(user));
+    try {
+        const response = await api.post('/login', { 
+            email: emailClean, 
+            password: passwordClean 
+        });
+        const { access_token, user } = response.data;
 
-            if (onLoginSuccess) {
-                onLoginSuccess();
-            }
-        } catch (err) {
-            setError(err.response?.data?.message || 'Email ou mot de passe incorrect.');
-        } finally {
-            setLoading(false);
+        localStorage.setItem('token', access_token);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        if (onLoginSuccess) {
+            onLoginSuccess();
         }
-    };
+    } catch (err) {
+        setError(err.response?.data?.message || 'Email ou mot de passe incorrect.');
+    } finally {
+        setLoading(false);
+    }
+};
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-slate-950 px-4 relative overflow-hidden font-sans">
@@ -56,6 +63,7 @@ export default function Login({ onLoginSuccess }) {
                         <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Email</label>
                         <div className="relative">
                             <Mail className="w-5 h-5 absolute left-3.5 top-3.5 text-slate-500" />
+                            
                             <input
                                 type="email"
                                 value={email}
@@ -63,6 +71,9 @@ export default function Login({ onLoginSuccess }) {
                                 required
                                 className="w-full pl-11 pr-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition"
                                 placeholder="admin@parapharmacie.com"
+                                autoCapitalize="none"
+                                autoCorrect="off"
+                                spellCheck="false"
                             />
                         </div>
                     </div>

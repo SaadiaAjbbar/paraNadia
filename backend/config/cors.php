@@ -6,11 +6,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
-        'https://frontend-seven-chi-92.vercel.app',
-        'http://localhost:3000',
-        'http://localhost:5173',
-    ],
+    'allowed_origins' => ['*'], // كيقبل جميع المصادر للـ Demo
 
     'allowed_origins_patterns' => [],
 
@@ -20,6 +16,6 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
+    'supports_credentials' => false, // ملي كتديري '*' خاص تحوليها لـ false
 
 ];
